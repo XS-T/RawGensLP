@@ -6,3 +6,6 @@ raw_gens:
     pitch:
     yaw:
     world:
+      raw_gens:
+        spawn:
+          world:

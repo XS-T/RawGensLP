@@ -12,14 +12,14 @@ class spawn_command @Inject constructor(private val plugin: RawGensCorePlugin) {
 	@CommandMethod("spawn")
 	@CommandDescription("Takes you to spawn")
 	suspend fun onspawn(player: Player) {
-		val xCord = plugin.config.getDouble("rawgens.spawn.x")
-		val yCord = plugin.config.getDouble("rawgens.spawn.y")
-		val zCord = plugin.config.getDouble("rawgens.spawn.z")
-		val pitch = plugin.config.getDouble("rawgens.spawn.pitch")
-		val yaw = plugin.config.getDouble("rawgens.spawn.yaw")
-		val worldName = plugin.config.getString("rawgens.spawn.world")
+		val xCord = plugin.config.getDouble("raw_gens.spawn.x")
+		val yCord = plugin.config.getDouble("raw_gens.spawn.y")
+		val zCord = plugin.config.getDouble("raw_gens.spawn.z")
+		val pitch = plugin.config.getDouble("raw_gens.spawn.pitch")
+		val yaw = plugin.config.getDouble("raw_gens.spawn.yaw")
+		val worldName = plugin.config.getString("raw_gens.spawn.world")!!
 
-		val world = Bukkit.getWorld(worldName!!)
+		val world = Bukkit.getWorld(worldName)
 		if (world == null) {
 			plugin.logger.warning("Invalid world name specified in config: $worldName")
 			return

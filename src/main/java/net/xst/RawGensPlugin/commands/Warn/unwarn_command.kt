@@ -41,28 +41,7 @@ class unwarn_command @Inject constructor(private val plugin: RawGensCorePlugin) 
 			player.sendMessage(text("Invalid index", NamedTextColor.RED))
 			return
 		}
-
-		warnings.forEachIndexed { index, warnPlayer ->
-			player.sendMessage(
-				Component.text(
-					"Successfully removed warning ${warnPlayer.reason} from ${target.displayName}",
-					NamedTextColor.YELLOW
-				)
-			)
-			val users = Bukkit.getOnlinePlayers()
-			for (user in users) {
-				if (user != player) {
-					warnings.forEachIndexed { index, warnPlayer ->
-						user.sendMessage(
-							Component.text(
-								"${player.displayName} removed warning ${warnPlayer.reason} from ${target.displayName} reason $reason_message",
-								NamedTextColor.YELLOW
-							)
-						)
-					}
-				}
-			}
+		player.sendMessage(text("Sucessfully removed warning #$warnIndex from ${target.displayName}"))
 			warnsmanager.removeWarning(player.uniqueId, warnIndex)
 		}
 	}
-}
