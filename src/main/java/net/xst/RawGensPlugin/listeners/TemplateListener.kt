@@ -1,4 +1,4 @@
-package net.xst.JailHomePlugin.listeners
+package net.xst.RawGensPlugin.listeners
 
 import com.google.inject.Inject
 import net.kyori.adventure.text.Component

@@ -22,7 +22,7 @@ import java.util.function.Function
 import kotlin.reflect.KClass
 
 //TODO: Move this to a separate project once we have an actual server and a maven repo
-abstract class JailHomePlugin : SuspendingJavaPlugin() {
+abstract class RawGensPlugin : SuspendingJavaPlugin() {
 	private lateinit var injector: Injector
 
 	lateinit var commandManager: PaperCommandManager<Player>

@@ -159,4 +159,5 @@ bukkit {
 	authors = listOf("JailHome Team", *project_owners.split(",").toTypedArray())
 	main = "$project_package.$project_plugin_class"
 	apiVersion = "1.18"
+	depend = listOf("LuckPerms")
 }

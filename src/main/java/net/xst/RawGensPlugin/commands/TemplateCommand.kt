@@ -1,4 +1,4 @@
-package net.xst.JailHomePlugin.commands
+package net.xst.RawGensPlugin.commands
 
 import cloud.commandframework.annotations.CommandDescription
 import cloud.commandframework.annotations.CommandMethod
