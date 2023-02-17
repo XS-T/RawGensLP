@@ -1,11 +1,7 @@
-raw_gens:
-  spawn:
-    x:
-    y:
-    z:
-    pitch:
-    yaw:
-    world:
-      raw_gens:
-        spawn:
-          world:
+#Spawn Command
+x: 78.0
+y: 71.0
+z: -115.0
+pitch: -1.9
+yaw: 93.5
+world-name: world

@@ -12,12 +12,14 @@ class spawn_command @Inject constructor(private val plugin: RawGensCorePlugin) {
 	@CommandMethod("spawn")
 	@CommandDescription("Takes you to spawn")
 	suspend fun onspawn(player: Player) {
-		val xCord = plugin.config.getDouble("raw_gens.spawn.x")
-		val yCord = plugin.config.getDouble("raw_gens.spawn.y")
-		val zCord = plugin.config.getDouble("raw_gens.spawn.z")
-		val pitch = plugin.config.getDouble("raw_gens.spawn.pitch")
-		val yaw = plugin.config.getDouble("raw_gens.spawn.yaw")
-		val worldName = plugin.config.getString("raw_gens.spawn.world")!!
+		val config = plugin.config
+		val xCord = config.getDouble("x")
+		val yCord = config.getDouble("y")
+		val zCord = config.getDouble("z")
+		val pitch = config.getDouble("pitch")
+		val yaw = config.getDouble("yaw")
+		val worldName = config.getString("world-name")
+		player.sendMessage(worldName!!)
 
 		val world = Bukkit.getWorld(worldName)
 		if (world == null) {
