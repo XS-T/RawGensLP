@@ -3,18 +3,39 @@ package net.xst.RawGensPlugin.commands.Vanish.listeners
 import com.google.inject.Inject
 import net.xst.RawGensPlugin.RawGensCorePlugin
 import net.xst.RawGensPlugin.RawGensCorePlugin.Companion.vanishManager
+import net.xst.RawGensPlugin.RawGensCorePlugin.Companion.vanishedPlayers
+import org.bukkit.Bukkit
 import org.bukkit.Server
+import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
+import java.util.*
 
 class VanishPlayerOnJoin @Inject constructor(private val server: Server,private val plugin:RawGensCorePlugin):Listener {
 	@EventHandler
-	fun onPlayerJoin(e:PlayerJoinEvent){
+	fun onPlayerJoin(e: PlayerJoinEvent) {
 		val player = e.player
-		val vanishedplayers = server.onlinePlayers.filter {vanishManager.isVanished(it)}
-		if(vanishedplayers.isNotEmpty()){
-			vanishedplayers.forEach{player.hidePlayer(plugin,it)}
+		if(!vanishedPlayers.contains(player.uniqueId)){
+			for(hidden_players in vanishedPlayers){
+				val online_players = Bukkit.getOnlinePlayers()
+				val hp = Bukkit.getOfflinePlayer(hidden_players)
+				for(other in online_players){
+					other.hidePlayer(plugin, hp as Player)
+				}
+			}
+		}else{
+			if (vanishedPlayers.isNotEmpty()) {
+				if(vanishedPlayers.contains(player.uniqueId)){
+					val online_players = Bukkit.getOnlinePlayers()
+					for(other in online_players){
+						if(other !=player){
+							other.hidePlayer(plugin,player)
+						}
+					}
+					player.sendMessage("")
+				}
+			}
 		}
 	}
 }

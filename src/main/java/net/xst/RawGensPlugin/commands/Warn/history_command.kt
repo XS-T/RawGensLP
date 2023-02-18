@@ -9,6 +9,7 @@ import com.google.gson.reflect.TypeToken
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.xst.RawGensPlugin.RawGensCorePlugin
+import net.xst.RawGensPlugin.RawGensCorePlugin.Companion.pluginmsg
 import net.xst.RawGensPlugin.RawGensCorePlugin.Companion.warnsmanager
 import net.xst.RawGensPlugin.Utils.WarnPlayer
 
@@ -27,12 +28,12 @@ class history_command {
 		}*/
 
 		if (warnList.isNotEmpty()) {
-			player.sendMessage(Component.text("Player ${target.name} has ${warnList.size} warning(s):", NamedTextColor.GREEN))
+			player.sendMessage("$pluginmsg Player ${target.name} has ${warnList.size} warning(s):")
 			warnList.forEachIndexed { index, warnPlayer ->
-				player.sendMessage(Component.text("$index: ${warnPlayer.reason} (${warnPlayer.date})", NamedTextColor.YELLOW))
+				player.sendMessage(Component.text("$index: ${warnPlayer.reason} (${warnPlayer.date})",NamedTextColor.GREEN))
 			}
 		} else {
-			player.sendMessage(Component.text("Player ${target.name} has no warnings", NamedTextColor.GREEN))
+			player.sendMessage("$pluginmsg Player ${target.name} has no warnings")
 		}
 	}
 

@@ -9,8 +9,10 @@ import net.xst.RawGensPlugin.commands.Vanish.listeners.VanishPlayerOnJoin
 import net.xst.RawGensPlugin.commands.Warn.history_command
 import net.xst.RawGensPlugin.commands.Warn.unwarn_command
 import net.xst.RawGensPlugin.commands.Warn.warn_command
+import net.xst.RawGensPlugin.commands.announce.announce_command
 import net.xst.common.RawGensPlugin
 import org.bukkit.Bukkit
+import org.bukkit.ChatColor
 import java.io.File
 import java.util.*
 
@@ -22,6 +24,8 @@ class RawGensCorePlugin : RawGensPlugin() {
 		lateinit var api:LuckPerms
 		lateinit var warnsDir:File
 		lateinit var vanishManager:VanishManager
+		lateinit var vanishedPlayers: MutableSet<UUID>
+		lateinit var pluginmsg:String
 	}
 	override suspend fun onEnableAsync() {
 		super.onEnableAsync()
@@ -30,6 +34,11 @@ class RawGensCorePlugin : RawGensPlugin() {
 		plugin = this
 		warnsmanager = WarnsManager(this)
 		vanishManager = VanishManager(this)
+		vanishedPlayers = mutableSetOf()
+		pluginmsg = plugin.config.getString("rawgens.plugin_message")!!
+		if(pluginmsg.contains('&')){
+			pluginmsg = ChatColor.translateAlternateColorCodes('&', pluginmsg)
+		}
 		warnsDir = File(plugin.dataFolder,"warns")
 		if(!warnsDir.exists()){
 			warnsDir.mkdirs()
@@ -46,7 +55,8 @@ class RawGensCorePlugin : RawGensPlugin() {
 			//Vanish
 			registerCommands(VanishCommand::class)
 			registerListeners(VanishPlayerOnJoin::class)
-		//Announce
+			//Announcement
+			registerCommands(announce_command::class)
 
 		//Config
 		plugin.config.options().copyDefaults()

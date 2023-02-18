@@ -8,6 +8,7 @@ import com.google.inject.Inject
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.xst.RawGensPlugin.RawGensCorePlugin
+import net.xst.RawGensPlugin.RawGensCorePlugin.Companion.pluginmsg
 import net.xst.RawGensPlugin.RawGensCorePlugin.Companion.warnsmanager
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
@@ -21,11 +22,6 @@ class warn_command @Inject constructor(private val plugin: RawGensCorePlugin){
 		val reason_message = reason.joinToString(" ")
 		val users = Bukkit.getOnlinePlayers()
 		warnsmanager.addWarning(player.uniqueId,reason_message,Date())
-		for(a in users){
-			if(a !=player){
-				a.sendMessage(Component.text("Player ${player.name} warned for reason: $reason_message", NamedTextColor.GREEN))
-			}
-		}
-		target.sendMessage(Component.text("You have been warned for reason: $reason_message", NamedTextColor.RED))
+		target.sendMessage("$pluginmsg You have been warned by $player for reason: $reason_message")
 	}
 }

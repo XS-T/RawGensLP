@@ -18,6 +18,7 @@ import org.bukkit.entity.Player
 import java.io.File
 import com.google.gson.GsonBuilder
 import net.kyori.adventure.text.Component.text
+import net.xst.RawGensPlugin.RawGensCorePlugin.Companion.pluginmsg
 import net.xst.RawGensPlugin.RawGensCorePlugin.Companion.warnsDir
 
 class unwarn_command @Inject constructor(private val plugin: RawGensCorePlugin) {
@@ -38,10 +39,10 @@ class unwarn_command @Inject constructor(private val plugin: RawGensCorePlugin) 
 		}*/
 
 		if (warnIndex > warnings.size) {
-			player.sendMessage(text("Invalid index", NamedTextColor.RED))
+			player.sendMessage("$pluginmsg Invalid index")
 			return
 		}
-		player.sendMessage(text("Sucessfully removed warning #$warnIndex from ${target.displayName}"))
+		player.sendMessage("$pluginmsg Sucessfully removed warning #$warnIndex from ${target.displayName} reasoning $reason_message")
 			warnsmanager.removeWarning(player.uniqueId, warnIndex)
 		}
 	}
