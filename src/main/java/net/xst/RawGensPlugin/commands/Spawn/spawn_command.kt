@@ -10,7 +10,7 @@ import org.bukkit.Location
 import org.bukkit.entity.Player
 
 class spawn_command @Inject constructor(private val plugin: RawGensCorePlugin) {
-	@CommandMethod("spawn")
+	@CommandMethod("rspawn")
 	@CommandDescription("Takes you to spawn")
 	suspend fun onspawn(player: Player) {
 		val config = plugin.config

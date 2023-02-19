@@ -20,7 +20,7 @@ import java.util.*
 class history_command {
 	@CommandMethod("history <target>")
 	@CommandDescription("View a player's warnings")
-	@CommandPermission("templateplugin.command.history")
+	@CommandPermission("rawgens.command.history")
 	suspend fun history(player: Player,@Argument("target") target:Player) {
 		var warnList = warnsmanager.getWarnings(target.uniqueId)
 		/*if (warnList.isEmpty()) {
