@@ -4,6 +4,7 @@ import net.luckperms.api.LuckPerms
 import net.xst.RawGensPlugin.Utils.FreezeManager
 import net.xst.RawGensPlugin.Utils.VanishManager
 import net.xst.RawGensPlugin.Utils.WarnsManager
+import net.xst.RawGensPlugin.commands.Discord.discord_command
 import net.xst.RawGensPlugin.commands.Freeze.freeze_command
 import net.xst.RawGensPlugin.commands.Freeze.listeners.FreezeJoinListener
 import net.xst.RawGensPlugin.commands.Freeze.listeners.Freeze_listener
@@ -68,6 +69,8 @@ class RawGensCorePlugin : RawGensPlugin() {
 			//Freeze
 			registerCommands(freeze_command::class,unfreeze_command::class)
 			registerListeners(Freeze_listener::class,FreezeJoinListener::class)
+			//Discord Command
+			registerCommands(discord_command::class)
 
 		//Config
 		plugin.config.options().copyDefaults()
