@@ -1,7 +1,10 @@
 package net.xst.RawGensPlugin.commands.Vanish.listeners
 
 import com.google.inject.Inject
+import net.luckperms.api.node.types.PermissionNode
 import net.xst.RawGensPlugin.RawGensCorePlugin
+import net.xst.RawGensPlugin.RawGensCorePlugin.Companion.api
+import net.xst.RawGensPlugin.RawGensCorePlugin.Companion.pluginmsg
 import net.xst.RawGensPlugin.RawGensCorePlugin.Companion.vanishManager
 import net.xst.RawGensPlugin.RawGensCorePlugin.Companion.vanishedPlayers
 import org.bukkit.Bukkit
@@ -20,8 +23,13 @@ class VanishPlayerOnJoin @Inject constructor(private val server: Server,private 
 			for(hidden_players in vanishedPlayers){
 				val online_players = Bukkit.getOnlinePlayers()
 				val hp = Bukkit.getOfflinePlayer(hidden_players)
+				val permnode = PermissionNode.builder("rawgens.vanish.see").build()
 				for(other in online_players){
-					other.hidePlayer(plugin, hp as Player)
+					if(api.userManager.getUser(other.uniqueId)?.nodes!!.contains(permnode)){
+						other.showPlayer(plugin,hp as Player)
+					}else{
+						other.hidePlayer(plugin,hp as Player)
+					}
 				}
 			}
 		}else{
@@ -32,8 +40,10 @@ class VanishPlayerOnJoin @Inject constructor(private val server: Server,private 
 						if(other !=player){
 							other.hidePlayer(plugin,player)
 						}
+						e.joinMessage = ""
+						player.scoreboard.resetScores(player)
 					}
-					player.sendMessage("")
+					player.sendMessage("$pluginmsg Your Still hidden :)")
 				}
 			}
 		}
