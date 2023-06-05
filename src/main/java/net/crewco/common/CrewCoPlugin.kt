@@ -1,4 +1,4 @@
-package net.xst.common
+package net.crewco.common
 
 import cloud.commandframework.annotations.AnnotationParser
 import cloud.commandframework.arguments.parser.StandardParameters
@@ -13,8 +13,8 @@ import com.github.shynixn.mccoroutine.bukkit.scope
 import com.google.inject.Guice
 import com.google.inject.Injector
 import net.kyori.adventure.platform.bukkit.BukkitAudiences
-import net.xst.common.injection.SpigotModule
-import net.xst.common.util.SpigotExecutor
+import net.crewco.common.injection.SpigotModule
+import net.crewco.common.util.SpigotExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.Listener
@@ -22,7 +22,7 @@ import java.util.function.Function
 import kotlin.reflect.KClass
 
 //TODO: Move this to a separate project once we have an actual server and a maven repo
-abstract class RawGensPlugin : SuspendingJavaPlugin() {
+abstract class CrewCoPlugin : SuspendingJavaPlugin() {
 	private lateinit var injector: Injector
 
 	lateinit var commandManager: PaperCommandManager<Player>

@@ -1,4 +1,4 @@
-package net.xst.common.util
+package net.crewco.common.util
 
 import org.bukkit.plugin.Plugin
 import java.util.concurrent.Executor

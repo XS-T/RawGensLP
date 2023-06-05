@@ -1,4 +1,4 @@
-package net.xst.RawGensPlugin.listeners
+package net.crewco.RawGensPlugin.listeners
 
 import com.google.inject.Inject
 import net.kyori.adventure.text.Component

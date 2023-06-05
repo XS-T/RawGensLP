@@ -78,7 +78,7 @@ dependencies {
 	compileOnly("net.luckperms:api:5.4")
 
 	//MySQL
-	implementation("mysql:mysql-connector-java:8.0.22")
+	implementation("mysql:mysql-connector-java:8.0.28")
 
 
 	// Kotlin
@@ -156,8 +156,8 @@ tasks {
 bukkit {
 	name = project_display_name
 	version = project_version
-	authors = listOf("JailHome Team", *project_owners.split(",").toTypedArray())
+	authors = listOf("CrewCo Team", *project_owners.split(",").toTypedArray())
 	main = "$project_package.$project_plugin_class"
-	apiVersion = "1.18"
+	apiVersion = "1.19"
 	depend = listOf("LuckPerms")
 }
