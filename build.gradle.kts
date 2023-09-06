@@ -158,6 +158,6 @@ bukkit {
 	version = project_version
 	authors = listOf("CrewCo Team", *project_owners.split(",").toTypedArray())
 	main = "$project_package.$project_plugin_class"
-	apiVersion = "1.19"
+	apiVersion = "1.20"
 	depend = listOf("LuckPerms")
 }
