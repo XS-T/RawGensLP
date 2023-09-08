@@ -1,1 +1,1 @@
-RawGens Core Plugin
+RawGens LuckPerms Gui plugin
