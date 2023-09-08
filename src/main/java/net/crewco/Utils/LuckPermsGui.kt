@@ -1,3 +1,4 @@
+import net.crewco.RawGensPlugin.RawGensLP.Companion.lpgui
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -116,6 +117,14 @@ class LuckPermsGui : Listener {
 					// You can use the item's metadata to identify the player and perform actions
 					player.sendMessage("You clicked on a player head!")
 					player.sendMessage(clickedItem.itemMeta.displayName)
+					val offline_player = Bukkit.getPlayer(clickedItem.itemMeta.displayName)
+					if (offline_player != null) {
+						if (offline_player.isOnline){
+							lpgui.openGUI(offline_player)
+						}
+					}else{
+						player.sendMessage("The Player is not online")
+					}
 				} else if (clickedItem.type == Material.ARROW) {
 					nextPage(player)
 				} else if (clickedItem.type == Material.BARRIER) {
