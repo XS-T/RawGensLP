@@ -1,3 +1,7 @@
+package net.crewco.Utils
+
+import net.crewco.RawGensPlugin.RawGensLP.Companion.editing
+import net.crewco.RawGensPlugin.RawGensLP.Companion.logo
 import net.crewco.RawGensPlugin.RawGensLP.Companion.lpgui
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -7,7 +11,6 @@ import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
-import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 
@@ -32,7 +35,7 @@ class LuckPermsGui : Listener {
 		val currentPage = playerPages[player] ?: 0
 		val startIndex = currentPage * playersPerPage
 		val onlinePlayers = Bukkit.getOnlinePlayers().toList()
-		val endIndex = Math.min(startIndex + playersPerPage, onlinePlayers.size)
+		val endIndex = (startIndex + playersPerPage).coerceAtMost(onlinePlayers.size)
 
 		val inventory = Bukkit.createInventory(null, 27, "RawGensPerms GUI - Page ${currentPage + 1}")
 
@@ -115,15 +118,20 @@ class LuckPermsGui : Listener {
 				if (clickedItem.type == Material.PLAYER_HEAD) {
 					// Handle clicking on player heads here
 					// You can use the item's metadata to identify the player and perform actions
-					player.sendMessage("You clicked on a player head!")
-					player.sendMessage(clickedItem.itemMeta.displayName)
+					//player.sendMessage("You clicked on a player head!")
+					//player.sendMessage(clickedItem.itemMeta.displayName)
 					val offline_player = Bukkit.getPlayer(clickedItem.itemMeta.displayName)
 					if (offline_player != null) {
 						if (offline_player.isOnline){
-							lpgui.openGUI(offline_player)
+							if(!editing.containsValue(offline_player)){
+								editing[player.uniqueId] = offline_player
+								lpgui.openGUI(player,offline_player)
+							}else {
+								player.sendMessage("$logo Some one is already editing this player")
+							}
 						}
 					}else{
-						player.sendMessage("The Player is not online")
+						player.sendMessage("$logo The Player is not online")
 					}
 				} else if (clickedItem.type == Material.ARROW) {
 					nextPage(player)

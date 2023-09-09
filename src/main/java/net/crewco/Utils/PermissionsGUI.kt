@@ -2,99 +2,229 @@ package net.crewco.Utils
 
 import com.google.inject.Inject
 import net.crewco.RawGensPlugin.RawGensLP
+import net.crewco.RawGensPlugin.RawGensLP.Companion.editing
+import net.crewco.RawGensPlugin.RawGensLP.Companion.logo
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
-import org.bukkit.inventory.Inventory
+import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.meta.ItemMeta
-import org.bukkit.plugin.java.JavaPlugin
 import net.luckperms.api.LuckPerms
 import net.luckperms.api.LuckPermsProvider
-import net.luckperms.api.model.user.User
-import net.luckperms.api.node.Node
-import org.bukkit.OfflinePlayer
+import net.luckperms.api.model.group.Group
+import net.luckperms.api.node.types.InheritanceNode
 
 class PermissionsGUI @Inject constructor(private val plugin: RawGensLP) : Listener {
 	private val luckPerms: LuckPerms = LuckPermsProvider.get()
+	private val groupsPerPage = 3 // Number of groups to display per page
+	private val groupPages = mutableMapOf<Player, Int>() // To store the current page for each player
 
-	fun openGUI(player:Player) {
-		val user: User = luckPerms.userManager.getUser(player.uniqueId) ?: return
-		val permissions: Set<String> = user.nodes
-			.filter { it.value }
-			.map { it.key }
-			.toSet()
-		val primaryGroup: String = user.primaryGroup
+	init {
+		// Create the initial pages when the plugin loads
+		createPages()
+	}
 
-		val gui: Inventory = Bukkit.createInventory(null, 54, "Permissions GUI of ${player.displayName}")
+	private fun createPages() {
+		val onlinePlayers = Bukkit.getOnlinePlayers()
+		for (player in onlinePlayers) {
+			groupPages[player] = 0 // Initialize each player's group page to 0
+		}
+	}
 
-		// Add permissions to the GUI
-		var index = 0
-		for (permission in permissions) {
-			if (index >= 45) break // Limit the number of permissions shown
+	private fun updatePages(player: Player, page: Int, target: Player) {
+		val startIndex = page * groupsPerPage
+		val endIndex = (startIndex + groupsPerPage).coerceAtMost(luckPerms.groupManager.loadedGroups.size)
 
-			val item = ItemStack(Material.BOOK)
-			val meta: ItemMeta = item.itemMeta
+		val inventory = Bukkit.createInventory(null, 54, "Groups of ${target.displayName} - Page ${page + 1}")
 
-			// Set the display name as a string
-			meta.setDisplayName(permission)
-			item.itemMeta = meta
+		// Fill the inventory with black glass panes for a nice background
+		val blackGlass = ItemStack(Material.BLACK_STAINED_GLASS_PANE)
+		val glassMeta = blackGlass.itemMeta
+		glassMeta.setDisplayName(" ") // Empty display name
+		blackGlass.itemMeta = glassMeta
 
-			gui.setItem(index, item)
-			index++
+		for (i in 0 until 54) {
+			inventory.setItem(i, blackGlass)
 		}
 
-		// Add the primary group to the GUI
-		val groupItem = ItemStack(Material.CHEST)
-		val groupMeta: ItemMeta = groupItem.itemMeta
+		// Add a back arrow
+		if (page > 0) {
+			val backArrow = ItemStack(Material.ARROW)
+			val backMeta = backArrow.itemMeta
+			backMeta.setDisplayName("Back")
+			backArrow.itemMeta = backMeta
+			inventory.setItem(45, backArrow)
+		}
 
-		// Set the display name as a string
-		groupMeta.setDisplayName(primaryGroup)
-		groupItem.itemMeta = groupMeta
+		// Add a close button
+		val closeButton = ItemStack(Material.BARRIER)
+		val closeMeta = closeButton.itemMeta
+		closeMeta.setDisplayName("Close")
+		closeButton.itemMeta = closeMeta
+		inventory.setItem(49, closeButton)
 
-		gui.setItem(45, groupItem) // Place it in a specific slot
+		// Fill the inventory with group buttons for the current page
+		for (i in startIndex until endIndex) {
+			val group = luckPerms.groupManager.loadedGroups.toList()[i]
+			val groupItem = createGroupItem(group, player, target)
+			inventory.setItem(i - startIndex, groupItem)
+		}
 
-		// Add buttons for actions (e.g., grant/revoke permissions)
+		// Add a "Next Page" button as the last item if there are more pages
+		if (endIndex < luckPerms.groupManager.loadedGroups.size) {
+			val nextPageButton = ItemStack(Material.ARROW)
+			val meta = nextPageButton.itemMeta
+			meta.setDisplayName("Next Page")
+			nextPageButton.itemMeta = meta
+			inventory.setItem(53, nextPageButton)
+		}
 
-		player.openInventory(gui)
+		// Add a "Previous Page" button as the first item if there are previous pages
+		if (page > 0) {
+			val previousPageButton = ItemStack(Material.ARROW)
+			val meta = previousPageButton.itemMeta
+			meta.setDisplayName("Previous Page")
+			previousPageButton.itemMeta = meta
+			inventory.setItem(45, previousPageButton)
+		}
+
+		// Store the inventory as the player's current page
+		player.openInventory(inventory)
+	}
+
+	private fun createGroupItem(group: Group, player: Player, target: Player): ItemStack {
+		val itemStack = ItemStack(Material.CHEST)
+		val meta = itemStack.itemMeta
+
+		// Set the display name to the group name
+		meta.setDisplayName(group.name)
+
+		// Check if the player is in the group
+		val user = luckPerms.userManager.getUser(target.uniqueId)
+		val nodeToCheck = InheritanceNode.builder(group.name).build()
+		if (user != null && user.nodes.contains(nodeToCheck)) {
+			meta.lore = listOf("§aEnabled")
+		} else {
+			meta.lore = listOf("§cDisabled")
+		}
+
+		itemStack.itemMeta = meta
+		return itemStack
+	}
+
+	fun openGUI(player: Player, target: Player) {
+		val page = groupPages[player] ?: 0
+		updatePages(player, page, target)
+	}
+
+	private fun nextPage(player: Player, target: Player) {
+		val currentPage = groupPages[player] ?: 0
+		val totalPages = (luckPerms.groupManager.loadedGroups.size + groupsPerPage - 1) / groupsPerPage
+
+		if (currentPage < totalPages - 1) { // Check if there are more pages
+			groupPages[player] = currentPage + 1
+			updatePages(player, currentPage + 1, target)
+		}
+	}
+
+	private fun previousPage(player: Player, target: Player) {
+		val currentPage = groupPages[player] ?: 0
+
+		if (currentPage > 0) { // Check if there are previous pages
+			groupPages[player] = currentPage - 1
+			updatePages(player, currentPage - 1, target)
+		}
 	}
 
 	@EventHandler
 	fun onInventoryClick(event: InventoryClickEvent) {
 		val player = event.whoClicked as? Player ?: return
-		val clickedItem = event.currentItem ?: return
+		val clickedInventory = event.clickedInventory ?: return
+		try {
+			val target = editing[player.uniqueId]!!
+			if (clickedInventory.holder == player.inventory.holder) return // Ignore player's own inventory
 
-		if (event.view.title == "Permissions GUI") {
-			event.isCancelled = true // Prevent item moving or other inventory actions
+			if (event.view.title.startsWith("Groups of")) {
+				val currentPage = groupPages[player] ?: 0
+				val page = event.view.title.substringAfter("Page ").toIntOrNull()
 
-			val clickedDisplayName = clickedItem.itemMeta?.displayName ?: return
+				if (page != null && currentPage == page - 1) {
+					val clickedItem = event.currentItem ?: return
 
-			// Check if the clicked item is a permission node
-			if (clickedItem.type == Material.BOOK) {
-				// Check if the player already has the permission
-				val user = luckPerms.userManager.getUser(player.uniqueId) ?: return
-				val permissionNode = clickedDisplayName
+					if (clickedItem.type == Material.CHEST) {
+						val groupName = clickedItem.itemMeta?.displayName ?: return
 
-				// Create a Node instance to check
-				val nodeToCheck = Node.builder(permissionNode).build()
+						val user = luckPerms.userManager.getUser(target.uniqueId)
+						val nodeToCheck = InheritanceNode.builder(groupName).build()
 
-				if (user.nodes.contains(nodeToCheck)) {
-					// Permission node already exists, revoke it
-					user.data().remove(nodeToCheck)
-					player.sendMessage("Revoked permission: $permissionNode")
-				} else {
-					// Permission node doesn't exist, grant it
-					val node = Node.builder(permissionNode).build()
-					user.data().add(node)
-					player.sendMessage("Granted permission: $permissionNode")
+						if (user != null) {
+							if (user.nodes.contains(nodeToCheck)) {
+								// Player is already a member of the group, remove them from the group
+								user.data().remove(nodeToCheck)
+								player.sendMessage("$logo Removed ${target.displayName} from the group $groupName")
+								target.sendMessage("$logo ${player.displayName} Removed you from the group $groupName")
+							} else {
+								// Player is not a member of the group, add them to the group
+								val node = InheritanceNode.builder(groupName).build()
+								user.data().add(node)
+								player.sendMessage("$logo Added ${target.displayName} to the group $groupName")
+								target.sendMessage("$logo ${player.displayName} Added you to the group $groupName")
+							}
+
+							luckPerms.userManager.saveUser(user)
+							// Update the clicked item's lore based on the player's current permissions
+							updateGroupItemLore(clickedItem, target)
+						}
+					} else if (clickedItem.type == Material.ARROW) {
+						event.isCancelled = true // Cancel the event to prevent item clicking
+
+						if (event.slot == 45) {
+							// Previous Page
+							previousPage(player, target)
+						} else if (event.slot == 53) {
+							// Next Page
+							nextPage(player, target)
+						}
+					} else if (clickedItem.type == Material.BARRIER) {
+						event.isCancelled = true // Cancel the event to prevent item clicking
+						// Close the GUI
+						player.closeInventory()
+					}
 				}
-
-				// Save changes to LuckPerms
-				luckPerms.userManager.saveUser(user)
 			}
+		} catch (_: Exception) {
+
 		}
+	}
+
+	@EventHandler
+	fun onPlayerJoin(event: PlayerJoinEvent) {
+		val player = event.player
+		groupPages[player] = 0 // Initialize the player's group page to 0 when they join
+	}
+
+	@EventHandler
+	fun onPlayerQuit(event: PlayerQuitEvent) {
+		val player = event.player
+		groupPages.remove(player) // Remove the player's group page when they quit
+	}
+
+	private fun updateGroupItemLore(itemStack: ItemStack, player: Player) {
+		val meta = itemStack.itemMeta ?: return
+		val groupName = meta.displayName ?: return
+		val user = luckPerms.userManager.getUser(player.uniqueId)
+		val nodeToCheck = InheritanceNode.builder(groupName).build()
+
+		if (user != null && user.nodes.contains(nodeToCheck)) {
+			meta.lore = listOf("§aEnabled")
+		} else {
+			meta.lore = listOf("§cDisabled")
+		}
+
+		itemStack.itemMeta = meta
 	}
 }
