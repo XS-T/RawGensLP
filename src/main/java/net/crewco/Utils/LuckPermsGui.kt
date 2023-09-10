@@ -35,7 +35,7 @@ class LuckPermsGui : Listener {
 		val currentPage = playerPages[player] ?: 0
 		val startIndex = currentPage * playersPerPage
 		val onlinePlayers = Bukkit.getOnlinePlayers().toList()
-		val endIndex = (startIndex + playersPerPage).coerceAtMost(onlinePlayers.size)
+		val endIndex = Math.min(startIndex + playersPerPage, onlinePlayers.size)
 
 		val inventory = Bukkit.createInventory(null, 27, "RawGensPerms GUI - Page ${currentPage + 1}")
 
@@ -117,35 +117,38 @@ class LuckPermsGui : Listener {
 
 				if (clickedItem.type == Material.PLAYER_HEAD) {
 					// Handle clicking on player heads here
-					// You can use the item's metadata to identify the player and perform actions
-					//player.sendMessage("You clicked on a player head!")
-					//player.sendMessage(clickedItem.itemMeta.displayName)
-					val offline_player = Bukkit.getPlayer(clickedItem.itemMeta.displayName)
-					if (offline_player != null) {
-						if (offline_player.isOnline){
-							if(!editing.containsValue(offline_player)){
-								editing[player.uniqueId] = offline_player
-								lpgui.openGUI(player,offline_player)
-							}else {
-								player.sendMessage("$logo Some one is already editing this player")
-							}
+					val offlinePlayerName = clickedItem.itemMeta.displayName
+					val offlinePlayer = Bukkit.getPlayer(offlinePlayerName)
+
+					if (offlinePlayer != null && offlinePlayer.isOnline) {
+						if (!editing.containsValue(offlinePlayer)) {
+							editing[player.uniqueId] = offlinePlayer
+							lpgui.openGUI(player)
+						} else {
+							player.sendMessage("$logo Someone is already editing this player")
 						}
-					}else{
+					} else {
 						player.sendMessage("$logo The Player is not online")
-					}
-				} else if (clickedItem.type == Material.ARROW) {
-					nextPage(player)
-				} else if (clickedItem.type == Material.BARRIER) {
-					// Handle closing the GUI here
-					player.closeInventory()
-				} else if (clickedItem.type == Material.ARROW && event.slot == 18) {
-					// Handle going back a page here
-					if (currentPage > 0) {
-						playerPages[player] = currentPage - 1
-						updatePages(player)
 					}
 				}
 			}
+		}
+
+		// Define currentPage here based on playerPages
+		val currentPage = playerPages[player] ?: 0
+
+		// Handle the buttons outside of the if block
+		val clickedItem = event.currentItem ?: return
+
+		if (clickedItem.type == Material.ARROW && event.slot == 26) {
+			nextPage(player)
+		} else if (clickedItem.type == Material.BARRIER && event.slot == 22) {
+			// Handle closing the GUI here
+			player.closeInventory()
+			playerPages.remove(player)
+		} else if (clickedItem.type == Material.ARROW && event.slot == 18) {
+			// Handle going back a page here
+			previousPage(player)
 		}
 	}
 
@@ -169,6 +172,16 @@ class LuckPermsGui : Listener {
 		if (nextPageIndex < (Bukkit.getOnlinePlayers().size + playersPerPage - 1) / playersPerPage) {
 			playerPages[player] = nextPageIndex
 			updatePages(player)
+		}
+	}
+	private fun previousPage(player: Player) {
+		val currentPage = playerPages.getValue(player)
+		if (currentPage > 0) {
+			val previousPageIndex = currentPage - 1
+			playerPages[player] = previousPageIndex
+			updatePages(player)
+		}else{
+			player.sendMessage("Nah")
 		}
 	}
 

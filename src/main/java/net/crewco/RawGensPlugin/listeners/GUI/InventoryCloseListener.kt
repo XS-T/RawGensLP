@@ -10,7 +10,7 @@ class InventoryCloseListener:Listener {
 	fun onInventoryClose(e:InventoryCloseEvent){
 		val player = e.player
 		val name = e.view.title
-		if(name.startsWith("Groups of ")){
+		if(name.startsWith("Permissions GUI")){
 			editing.remove(player.uniqueId)
 		}
 	}
